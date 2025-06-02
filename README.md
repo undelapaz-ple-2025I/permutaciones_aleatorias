@@ -107,4 +107,4 @@ La fecha de entrega será indicada en Google Classroom. Asegúrate de:
 Si encuentras problemas técnicos o tienes preguntas sobre la tarea, por favor:
 1. Revisa la documentación de los paquetes
 2. Consulta los recursos adicionales
-3. Contacta al instructor a través de Google Classroom
+3. Contacta a los docentes a través de Google Classroom
