@@ -1,0 +1,517 @@
+---
+title: "Comparación de dos muestras"
+author: "Adaptado desde cuaderno de Jupyter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+
+# Create figures directory if it doesn't exist
+dir.create("figures", showWarnings = FALSE)
+```
+
+# Comprarando 2 Muestras - prueba A/B
+
+Uno de los objetivos del estudio es ver si el tabaquismo materno estaba asociado al peso al nacer. Veamos qué podemos decir sobre las dos variables.
+
+
+```{r}
+nacimientos <- read.csv('https://raw.githubusercontent.com/jphoyos/fup/main/data/bebes.csv')
+
+# Convert Fumadora.materna to proper boolean values
+nacimientos$Fumadora.materna <- as.logical(nacimientos$Fumadora.materna)
+
+fumadora_pesonacimiento <- nacimientos %>% 
+  select(Fumadora.materna, Peso.al.nacer)
+```
+
+
+```{r}
+head(nacimientos)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Peso al nacer</th>
+      <th>Días de gestación</th>
+      <th>Edad materna</th>
+      <th>Altura materna</th>
+      <th>Peso materno en el embarazo</th>
+      <th>Fumadora materna</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>120</td>
+      <td>284</td>
+      <td>27</td>
+      <td>62</td>
+      <td>100</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>113</td>
+      <td>282</td>
+      <td>33</td>
+      <td>64</td>
+      <td>135</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>128</td>
+      <td>279</td>
+      <td>28</td>
+      <td>64</td>
+      <td>115</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>108</td>
+      <td>282</td>
+      <td>23</td>
+      <td>67</td>
+      <td>125</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>136</td>
+      <td>286</td>
+      <td>25</td>
+      <td>62</td>
+      <td>93</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1169</th>
+      <td>113</td>
+      <td>275</td>
+      <td>27</td>
+      <td>60</td>
+      <td>100</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1170</th>
+      <td>128</td>
+      <td>265</td>
+      <td>24</td>
+      <td>67</td>
+      <td>120</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1171</th>
+      <td>130</td>
+      <td>291</td>
+      <td>30</td>
+      <td>65</td>
+      <td>150</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1172</th>
+      <td>125</td>
+      <td>281</td>
+      <td>21</td>
+      <td>65</td>
+      <td>110</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1173</th>
+      <td>117</td>
+      <td>297</td>
+      <td>38</td>
+      <td>65</td>
+      <td>129</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+<p>1174 rows × 6 columns</p>
+</div>
+
+
+
+
+```{r}
+fumadora_pesonacimiento %>% 
+  group_by(Fumadora.materna) %>% 
+  summarise(count = n())
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Fumadora materna</th>
+      <th>Peso al nacer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>False</td>
+      <td>120</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>False</td>
+      <td>113</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>True</td>
+      <td>128</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>True</td>
+      <td>108</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>False</td>
+      <td>136</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1169</th>
+      <td>False</td>
+      <td>113</td>
+    </tr>
+    <tr>
+      <th>1170</th>
+      <td>False</td>
+      <td>128</td>
+    </tr>
+    <tr>
+      <th>1171</th>
+      <td>True</td>
+      <td>130</td>
+    </tr>
+    <tr>
+      <th>1172</th>
+      <td>False</td>
+      <td>125</td>
+    </tr>
+    <tr>
+      <th>1173</th>
+      <td>False</td>
+      <td>117</td>
+    </tr>
+  </tbody>
+</table>
+<p>1174 rows × 2 columns</p>
+</div>
+
+```{r}
+fumadora_pesonacimiento %>% 
+  group_by(Fumadora.materna) %>% 
+  summarise(count = n())
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Fumadora materna</th>
+      <th>count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>False</td>
+      <td>715</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>True</td>
+      <td>459</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```{r}
+# Create histogram using ggplot2
+p1 <- ggplot(fumadora_pesonacimiento, aes(x = Peso.al.nacer, fill = Fumadora.materna)) +
+  geom_histogram(position = "identity", alpha = 0.5, bins = 20) +
+  labs(x = "Peso al nacer",
+       y = "Frecuencia",
+       title = "Distribución del peso al nacer por grupo de fumadoras") +
+  theme_minimal()
+
+# Save the plot
+ggsave("figures/output_7_0.png", p1, width = 8, height = 6)
+p1
+```
+
+
+    
+![png](figures/output_7_0.png)
+    
+
+
+
+```{r}
+# Create histogram for smokers only
+p2 <- ggplot(fumadora_pesonacimiento %>% filter(Fumadora.materna == TRUE),
+       aes(x = Peso.al.nacer)) +
+  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.7) +
+  labs(x = "Peso al nacer",
+       y = "Densidad",
+       title = "Distribución del peso al nacer - Fumadoras") +
+  theme_minimal()
+
+# Save the plot
+ggsave("figures/output_8_0.png", p2, width = 8, height = 6)
+p2
+```
+
+
+    
+![png](figures/output_8_0.png)
+    
+
+
+
+```{r}
+# Create histogram with black borders
+p3 <- ggplot(fumadora_pesonacimiento %>% filter(Fumadora.materna == TRUE),
+       aes(x = Peso.al.nacer)) +
+  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.7, color = "black") +
+  labs(x = "Peso al nacer",
+       y = "Densidad",
+       title = "Distribución del peso al nacer - Fumadoras") +
+  theme_minimal()
+
+# Save the plot
+ggsave("figures/output_9_0.png", p3, width = 8, height = 6)
+p3
+```
+
+
+    
+![png](figures/output_9_0.png)
+    
+
+
+La distribución de los pesos de los bebés nacidos de madres fumadoras parece estar basada ligeramente a la izquierda de la distribución correspondiente a las madres no fumadoras. Los pesos de los bebés de las madres fumadoras parecen ser más bajos en promedio que los pesos de los bebés de las no fumadoras. 
+
+Esto plantea la cuestión de si la diferencia refleja sólo la variación del azar o una diferencia en las distribuciones de la población más amplia. ¿Podría ser que no hubiera diferencia entre las dos distribuciones en la población, pero que estuviéramos viendo una diferencia en las muestras sólo por las madres que fueron seleccionadas?
+
+## Las hipótesis
+Podemos intentar responder a esta pregunta mediante una prueba de hipótesis. El modelo de azar que vamos a probar dice que no hay ninguna diferencia subyacente en las poblaciones; las distribuciones en las muestras son diferentes sólo debido al azar. 
+
+Formalmente, ésta es la hipótesis nula. Vamos a tener que averiguar cómo simular un estadístico útil bajo esta hipótesis. Pero para empezar, vamos a plantear las dos hipótesis naturales.
+
+**Hipótesis nula:** En la población, la distribución del peso al nacer de los bebés es la misma para las madres que no fuman que para las que sí lo hacen. La diferencia en la muestra se debe al azar.
+
+**Hipótesis alternativa:** En la población, los bebés de las madres que fuman tienen un peso menor al nacer, en promedio, que los bebés de las no fumadoras.
+
+# Estadística de prueba
+
+Preguna: ¿Qué valores de nuestro estadístico están a favor de la alternativa: positivos o negativos?
+
+Los valores pequeños (es decir, los valores negativos grandes) de este estadístico favorecerán la hipótesis alternativa.
+
+
+```{r}
+# Calculate mean weights by smoking status
+tabla_promedios <- fumadora_pesonacimiento %>%
+  group_by(Fumadora.materna) %>%
+  summarise(mean_weight = mean(Peso.al.nacer))
+
+# Calculate observed difference
+diferencia_observada <- tabla_promedios$mean_weight[2] - tabla_promedios$mean_weight[1]
+diferencia_observada
+```
+
+```{r}
+# Function to calculate difference of means
+diferencia_de_promedios <- function(tabla, etiqueta, etiqueta_grupo) {
+  tabla %>%
+    group_by(!!sym(etiqueta_grupo)) %>%
+    summarise(mean_val = mean(!!sym(etiqueta))) %>%
+    pull(mean_val) %>%
+    diff()
+}
+```
+
+
+```{r}
+# Test the function
+diferencia_de_promedios(nacimientos, 'Peso.al.nacer', 'Fumadora.materna')
+```
+
+```{r}
+# Function to simulate one permutation
+diferencia_una_simulada <- function(tabla, etiqueta, etiqueta_grupo) {
+  # Create a copy of the table
+  tabla_permutada <- tabla
+  
+  # Permute the group labels
+  tabla_permutada[[etiqueta_grupo]] <- sample(tabla[[etiqueta_grupo]])
+  
+  # Calculate and return the difference
+  diferencia_de_promedios(tabla_permutada, etiqueta, etiqueta_grupo)
+}
+```
+
+
+```{r}
+# Run the simulation
+repeticiones <- 5000
+diferencias <- numeric(repeticiones)
+
+for(i in 1:repeticiones) {
+  diferencias[i] <- diferencia_una_simulada(nacimientos, 'Peso.al.nacer', 'Fumadora.materna')
+}
+```
+
+
+```{r}
+# Create histogram of simulated differences
+p4 <- ggplot(data.frame(diferencias = diferencias), aes(x = diferencias)) +
+  geom_histogram(bins = 30, fill = "#F2AB6D", color = "black") +
+  labs(title = "Predicción sobre la Hipótesis Nula",
+       x = "Diferencias entre los promedios de los grupos",
+       y = "% por unidad") +
+  theme_minimal()
+
+# Save the plot
+ggsave("figures/output_32_1.png", p4, width = 8, height = 6)
+p4
+
+# Print observed difference
+cat("Diferencia observada:", diferencia_observada)
+```
+
+![png](figures/output_32_1.png)
+    
+
+
+Observe cómo la distribución se centra en torno a 0. Esto tiene sentido, porque bajo la hipótesis nula los dos grupos deberían tener aproximadamente la misma media. Por lo tanto, la diferencia entre las medias de los grupos debería estar en torno a 0.
+
+La diferencia observada en la muestra original es de aproximadamente $9.27$, que ni siquiera aparece en la escala horizontal del histograma. El valor observado de la estadística y el comportamiento predicho de la estadística bajo la hipótesis nula son inconsistentes. 
+
+La conclusión de la prueba es que los datos **favorecen la alternativa** sobre la nula. El peso medio al nacer de los bebés de madres fumadoras es menor que el peso medio al nacer de los bebés de madres no fumadoras.
+
+Si quiere calcular un **valor-P** empírico, recuerde que los valores bajos del estadístico favorecen la hipótesis alternativa. 
+
+
+```{r}
+# Calculate empirical p-value
+P_empirico <- mean(diferencias <= diferencia_observada)
+P_empirico
+```
+
+
+
+
+    0.0
+
+
+
+El valor P empírico es 0, lo que significa que ninguna de las 5.000 muestras permutadas dio lugar a una diferencia de -9,27 o inferior. Esto es sólo una aproximación. La probabilidad exacta de obtener una diferencia en ese intervalo no es 0, pero es muy pequeña.
+
+**Ejericicio:** utilize el mismo método para comparar otros atributos de las fumadoras y las no fumadoras, como sus edades. 
+
+OBS:Los histogramas de las edades de los dos grupos muestran que, en la muestra, las madres que fumaban tendían a ser más jóvenes.
+
+Sol: El valor P empírico se sitúa en torno al 1% 
+
+
+```{r}
+# Exercise: Compare other attributes between smokers and non-smokers
+# For example, compare maternal ages
+edad_promedios <- nacimientos %>%
+  group_by(Fumadora.materna) %>%
+  summarise(mean_age = mean(Edad.materna))
+
+# Calculate observed difference in ages
+diferencia_edad_observada <- edad_promedios$mean_age[2] - edad_promedios$mean_age[1]
+
+# Run simulation for age comparison
+diferencias_edad <- numeric(repeticiones)
+for(i in 1:repeticiones) {
+  diferencias_edad[i] <- diferencia_una_simulada(nacimientos, 'Edad.materna', 'Fumadora.materna')
+}
+
+# Calculate empirical p-value for age comparison
+P_empirico_edad <- mean(diferencias_edad <= diferencia_edad_observada)
+P_empirico_edad
+```
