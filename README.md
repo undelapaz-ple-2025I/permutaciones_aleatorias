@@ -1,4 +1,4 @@
-# Comparación de Dos Muestras - Análisis Estadístico
+# Permutaciones Aleatorias
 
 Este repositorio contiene una tarea de análisis estadístico que involucra la comparación de dos muestras utilizando R Markdown.
 
@@ -56,7 +56,7 @@ install.packages(c("tidyverse", "ggplot2", "rmarkdown", "gapminder"))
    - Una pregunta de investigación clara
    - Hipótesis nula y alternativa
    - Visualización de datos
-   - Prueba estadística apropiada
+   - Prueba estadística basada en permutaciones aleatorias
    - Interpretación de resultados
 
 ## Estructura del Repositorio
